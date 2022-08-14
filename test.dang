@@ -1,0 +1,7 @@
+use > system.dang
+
+# comment
+
+write "hello world!"
+
+system.exec "start cmd.exe"
