@@ -2,6 +2,9 @@ use > system.dang
 
 # comment
 
-write "hello world!"
+def mydef {
+write hello
+# notin
+}
 
-system.exec "start cmd.exe"
+mydef
