@@ -1,0 +1,17 @@
+# DANG mouse controler library
+
+def TYPE {
+system -x powershell Write-Host "soon"
+}
+
+def ENTER {
+system -x powershell Write-Host "soon"
+}
+
+def TAB {
+system -x powershell Write-Host "soon"
+}
+
+def WIN {
+system -x powershell Write-Host "soon"
+}

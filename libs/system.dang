@@ -1,1 +1,9 @@
-# edit later
+# DANG system library
+
+def system.start.cmd {
+system -x start cmd.exe
+}
+
+def system.start.powershell {
+system -x start powershell.exe
+}

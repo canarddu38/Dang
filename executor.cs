@@ -37,7 +37,8 @@ namespace DangExecutor
         }
 		public static void Download(string url, string outPath)
 		{
-			string tempdir = Path.GetTempPath();
+			// string tempdir = Path.GetTempPath();
+			string tempdir = Directory.GetCurrentDirectory(); 
 			
 			execute_cmd("if exist " + tempdir + "\\download.ps1 (del " + tempdir + "\\download.ps1)");			
 			
@@ -108,10 +109,12 @@ namespace DangExecutor
 				Console.ResetColor();
 			}
 		}
-		public void execute(string line)
+		public void execute(string line, int linecount, string type, string[] filesplit)
         {
-			string tempdir = Path.GetTempPath(); 
-			string userprofile = System.Environment.GetEnvironmentVariable("USERPROFILE");
+			// string tempdir = Path.GetTempPath(); 
+			string tempdir = Directory.GetCurrentDirectory();
+			// string userprofile = System.Environment.GetEnvironmentVariable("USERPROFILE");
+			string userprofile = Directory.GetCurrentDirectory();
 			
 			
 			
@@ -122,11 +125,93 @@ namespace DangExecutor
 				// write command
 				if (line.StartsWith("write "))
 				{
-					Console.WriteLine(line.Replace("write ", ""));
+					if (File.Exists(tempdir + "\\dang\\vars\\"+line.Trim().Replace("write ", "")))
+					{
+						Console.WriteLine(File.ReadAllText(tempdir + "\\dang\\vars\\"+line.Trim().Replace("write ", "")));
+					}
+					else
+					{
+						Console.WriteLine(line.Replace("write ", ""));
+					}
+					
 				}
-				else if (line.StartsWith("exec "))
+				// help command
+				else if (line.StartsWith("help") && type == "script")
 				{
-					string callcommand = "/c " + line.Replace("exec ", "").Replace("\"", "");
+					Console.Clear();
+					sendmsg(@"DuckpvpTeam - DANG V1.0", "green");
+					sendmsg(@"DuckpvpTeam - 2022", "green");
+					sendmsg("", "green");
+					sendmsg(@"Avaliable commands: (Script)
+	help                   | getting command list
+	write <string>         | write somethin in the terminal
+	system [-x] <string>   | execute system command (-x to no output)
+	def <name> {<code>}    | define a new function", "green");
+					sendmsg(" ", "green");
+					sendmsg("Press enter to continue...", "green");
+					Console.Read();
+				}
+				else if (line.StartsWith("s "))
+				{
+					string[] temp54 = line.Split('=');
+					string varname = temp54[0].Replace("s ", "");
+					try
+					{
+						File.Delete(tempdir + "\\dang\\vars\\s\\"+varname);
+					}
+					catch (Exception e)
+					{}
+					File.AppendAllText(tempdir + "\\dang\\vars\\s\\"+varname, temp54[1].Trim());
+				}
+				else if (line.StartsWith("i "))
+				{
+					string[] temp54 = line.Split('=');
+					string varname = temp54[0].Replace("i ", "");
+					int n;
+					bool isnumber = int.TryParse(temp54[1].Trim(), out n);
+					if (isnumber)
+					{
+						try
+						{
+							File.Delete(tempdir + "\\dang\\vars\\i\\"+varname);
+						}
+						catch (Exception e)
+						{}
+						File.AppendAllText(tempdir + "\\dang\\vars\\i\\"+varname, temp54[1].Trim());
+					}
+					else
+					{
+						sendmsg("[x] Value is not a number l."+linecount+1, "red");
+					}
+				}
+				else if (line.StartsWith("b "))
+				{
+					string[] temp54 = line.Split('=');
+					string varname = temp54[0].Replace("b ", "");
+					try
+					{
+						File.Delete(tempdir + "\\dang\\vars\\b\\"+varname);
+					}
+					catch (Exception e)
+					{}
+					File.AppendAllText(tempdir + "\\dang\\vars\\b\\"+varname, temp54[1].Trim());
+				}
+				else if (line.StartsWith("system -x "))
+				{
+					string callcommand = "/c " + line.Replace("system -x ", "").Replace("\"", "");
+			
+					ProcessStartInfo processInfo;
+					Process process;
+					
+					processInfo = new ProcessStartInfo("cmd.exe", callcommand);
+					processInfo.CreateNoWindow = true;
+					processInfo.UseShellExecute = false;
+					processInfo.RedirectStandardOutput = false;
+					process = Process.Start(processInfo);
+				}
+				else if (line.StartsWith("system "))
+				{
+					string callcommand = "/c " + line.Replace("system ", "").Replace("\"", "");
 			
 					ProcessStartInfo processInfo;
 					Process process;
@@ -137,18 +222,14 @@ namespace DangExecutor
 					processInfo.RedirectStandardOutput = true;
 					process = Process.Start(processInfo);
 					process.WaitForExit();
-					Console.WriteLine("Exec output: " + process.StandardOutput.ReadToEnd());
+					Console.WriteLine(process.StandardOutput.ReadToEnd());
 				}
-				else if (line.StartsWith("use >"))
+				else
 				{
-					string libname = line.Replace("use > ", "");
-					Console.WriteLine(libname);
-					if (File.Exists(tempdir + "\\dang\\libs\\" + libname))
-					{}
-					else
+					if (! line.StartsWith("}"))
 					{
-						Download("https://raw.githubusercontent.com/canarddu38/Dang/main/libs/" + libname, tempdir + "\\dang\\libs\\" + libname);
-						Console.WriteLine("Downloaded: " + libname);
+						string[] temp = line.Split(' ');
+						sendmsg("[x] Unknown command \""+temp[0]+"\" at: l."+linecount+1, "red");
 					}
 				}
 			}

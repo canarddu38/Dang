@@ -1,10 +1,11 @@
+
 use > system.dang
+# use > system.dang
 
-# comment
+# dang sample script
 
-def mydef {
-write hello
-# notin
-}
+s my_string = john_cena
+i my_number = 1
+b my_bool = true 
 
-mydef
+write my_string

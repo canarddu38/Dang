@@ -1,0 +1,13 @@
+# DANG mouse controler library
+
+def goto {
+system powershell Write-Host "soon"
+}
+
+def click-right {
+system powershell Write-Host "soon"
+}
+
+def click-left {
+system powershell Write-Host "soon"
+}
