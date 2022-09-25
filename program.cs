@@ -131,6 +131,7 @@ namespace DangCompiler
 			int a = 0;
 			foreach (var line in filesplit)
 			{
+				// sendmsg(dangfilepath+": "+line, "yellow");
 				string[] temp = line.Split(' ');
 				if (File.Exists(tempdir + "\\dang\\def\\" + temp[0]+".dang"))
 				{
@@ -148,12 +149,13 @@ namespace DangCompiler
 				
 				else if (line.StartsWith("def "))
 				{
-					a++;
+					// a++;
 					string defname = temp[1];
-					Console.WriteLine("New def: "+defname);
+					// Console.WriteLine("New def: "+defname);
 					string defcontent = "# def header";
-					while(! filesplit[a].StartsWith("}"))
+					while(! filesplit[a].Trim().StartsWith("}"))
 					{
+						sendmsg(defname+": "+filesplit[a], "green");
 						defcontent = defcontent + "\n" + filesplit[a];
 						filesplit[a] = "# "+filesplit[a];
 						a++;
@@ -198,6 +200,19 @@ namespace DangCompiler
 				{
 					dir.Delete(true); 
 				}
+				di = new DirectoryInfo(tempdir + "\\dang\\vars");
+
+				foreach (FileInfo file in di.GetFiles())
+				{
+					file.Delete(); 
+				}
+				foreach (DirectoryInfo dir in di.GetDirectories())
+				{
+					dir.Delete(true); 
+				}
+				Directory.CreateDirectory(tempdir + "\\dang\\vars\\b");
+				Directory.CreateDirectory(tempdir + "\\dang\\vars\\s");
+				Directory.CreateDirectory(tempdir + "\\dang\\vars\\i");
 			}
 			if (args.Length >= 1)
 			{
@@ -212,6 +227,7 @@ namespace DangCompiler
 						string libname = line.Replace("use > ", "");
 						if (File.Exists(tempdir + "\\dang\\libs\\" + libname))
 						{
+							sendmsg(libname+" exist", "green");
 							string file2 = System.IO.File.ReadAllText(tempdir + "\\dang\\libs\\" + libname);
 							Console.WriteLine(tempdir + "\\dang\\libs\\" + libname);
 							exec_dang(tempdir + "\\dang\\libs\\" + libname);
@@ -219,12 +235,16 @@ namespace DangCompiler
 						else
 						{
 							Download("https://raw.githubusercontent.com/canarddu38/Dang/main/libs/" + libname, tempdir + "\\dang\\libs\\" + libname);
-							sendmsg("[o] Downloaded library: " + libname, "green");
 							if (File.Exists(tempdir + "\\dang\\libs\\" + libname))
 							{
+								sendmsg("[o] Downloaded library: " + libname, "green");
 								string file2 = System.IO.File.ReadAllText(tempdir + "\\dang\\libs\\" + libname);
 								Console.WriteLine("lib");
 								exec_dang(tempdir + "\\dang\\libs\\" + libname);
+							}
+							else
+							{
+								sendmsg("[x] The library ("+libname+") does not exist in our database.", "red");
 							}
 						}
 						write_txt_to_file(args[0], file.Replace("use > "+libname, "#  use > "+libname));

