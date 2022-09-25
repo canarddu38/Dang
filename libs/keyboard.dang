@@ -1,17 +1,24 @@
 # DANG mouse controler library
 
 def TYPE {
-system -x powershell Write-Host "soon"
+system powershell Write-Host "soon"
 }
+
 
 def ENTER {
-system -x powershell Write-Host "soon"
+system powershell Write-Host "soon"
 }
+
 
 def TAB {
-system -x powershell Write-Host "soon"
+system powershell Write-Host "soon"
+system powershell Write-Host "soon2"
+system powershell Write-Host "soon3"
+system powershell Write-Host "soon4"
+system powershell Write-Host "soon5"
 }
 
+
 def WIN {
-system -x powershell Write-Host "soon"
+system powershell Write-Host "soon"
 }
