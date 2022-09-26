@@ -1,6 +1,5 @@
 # Dang
-Dang is the easyest programming language to learn
-
+Dang is used to make custom <a href="https://ducksploit.com">DuckSploit</a> payloads
 
 ```
 usage: dang.exe <file path>
