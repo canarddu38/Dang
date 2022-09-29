@@ -147,9 +147,6 @@ namespace DangExecutor
 	write <string>         | write somethin in the terminal
 	system [-x] <string>   | execute system command (-x to no output)
 	def <name> {<code>}    | define a new function", "green");
-					sendmsg(" ", "green");
-					sendmsg("Press enter to continue...", "green");
-					Console.Read();
 				}
 				else if (line.StartsWith("s "))
 				{
