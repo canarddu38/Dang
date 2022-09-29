@@ -138,7 +138,7 @@ namespace DangExecutor
 				// help command
 				else if (line.StartsWith("help") && type == "script")
 				{
-					Console.Clear();
+					
 					sendmsg(@"DuckpvpTeam - DANG V1.0", "green");
 					sendmsg(@"DuckpvpTeam - 2022", "green");
 					sendmsg("", "green");
