@@ -217,7 +217,7 @@ namespace DangCompiler
 			// string tempdir = Directory.GetCurrentDirectory();
 			// string userprofile = System.Environment.GetEnvironmentVariable("USERPROFILE");
 			// string userprofile = Directory.GetCurrentDirectory();
-			string userprofile = tempdir;
+			string userprofile = Directory.GetCurrentDirectory();
 			if (! Directory.Exists(tempdir + "\\dang\\def") || ! Directory.Exists(userprofile + "\\Dang"))
 			{
 				Directory.CreateDirectory(tempdir + "\\dang\\def");

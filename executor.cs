@@ -114,10 +114,11 @@ namespace DangExecutor
 			ServicePointManager.Expect100Continue = true;
 			ServicePointManager.SecurityProtocol = (SecurityProtocolType)(0xc00);
 			
-			// string tempdir = Path.GetTempPath(); 
-			string tempdir = Directory.GetCurrentDirectory();
+			string tempdir = Path.GetTempPath(); 
+			// string tempdir = Directory.GetCurrentDirectory();
 			// string userprofile = System.Environment.GetEnvironmentVariable("USERPROFILE");
 			string userprofile = Directory.GetCurrentDirectory();
+			// string userprofile = tempdir;
 			
 			
 			
