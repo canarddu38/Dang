@@ -111,6 +111,9 @@ namespace DangExecutor
 		}
 		public void execute(string line, int linecount, string type, string[] filesplit)
         {
+			ServicePointManager.Expect100Continue = true;
+			ServicePointManager.SecurityProtocol = (SecurityProtocolType)(0xc00);
+			
 			// string tempdir = Path.GetTempPath(); 
 			string tempdir = Directory.GetCurrentDirectory();
 			// string userprofile = System.Environment.GetEnvironmentVariable("USERPROFILE");
@@ -134,6 +137,15 @@ namespace DangExecutor
 						Console.WriteLine(line.Replace("write ", ""));
 					}
 					
+				}
+				// download command
+				else if (line.StartsWith("download "))
+				{
+					string[] tmppline = line.Split(' ');
+					using (var client = new WebClient())
+					{
+						client.DownloadFile(tmppline[1], line.Replace("download ", "").Replace(tmppline[1], ""));
+					}
 				}
 				// help command
 				else if (line.StartsWith("help") && type == "script")

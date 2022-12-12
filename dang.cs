@@ -17,6 +17,7 @@ namespace DangCompiler
 {
     class Program
 	{
+		public static bool debug = false;
 		public static void sendmsg(string message, string color)
 		{
 			if (color == "red")
@@ -44,6 +45,36 @@ namespace DangCompiler
 				Console.ResetColor();
 			}
 		}
+		public static void log(string message, string color)
+		{
+			if(debug == true)
+			{
+				if (color == "red")
+				{
+					Console.ForegroundColor = ConsoleColor.Red;
+					Console.WriteLine(message);
+					Console.ResetColor();
+				}
+				else if (color == "green")
+				{
+					Console.ForegroundColor = ConsoleColor.Green;
+					Console.WriteLine(message);
+					Console.ResetColor();
+				}
+				else if (color == "yellow")
+				{
+					Console.ForegroundColor = ConsoleColor.Yellow;
+					Console.WriteLine(message);
+					Console.ResetColor();
+				}
+				else if (color == "blue")
+				{
+					Console.ForegroundColor = ConsoleColor.Blue;
+					Console.WriteLine(message);
+					Console.ResetColor();
+				}
+			}
+		}
 		public static void execute_cmd(string cmd)
         {
             
@@ -65,50 +96,13 @@ namespace DangCompiler
         }
 		public static void Download(string url, string outPath)
 		{
-			// string tempdir = Path.GetTempPath();
-			string tempdir = "./";
+			string tempdir = Path.GetTempPath();
 			
-			execute_cmd("if exist " + tempdir + "\\download.ps1 (del " + tempdir + "\\download.ps1)");			
-			
-			
-			url = '"' + url + '"';
-			
-			outPath = '"' + outPath + '"';
-			
-			string str = "(New-Object System.Net.WebClient).DownloadFile(" + url + ", " + outPath + ")";
-			
-			outPath = tempdir + "/download.ps1";
-			
-            // open or create file
-            FileStream streamfile = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.Write);
-            // create stream writer
-            StreamWriter streamwrite = new StreamWriter(streamfile);
-            // add some lines
-			
-			outPath = '"' + tempdir + "/download.ps1" + '"';
+			ServicePointManager.Expect100Continue = true;
+			ServicePointManager.SecurityProtocol = (SecurityProtocolType)(0xc00);
 			
 			
-			// string powershelldownloadtxt = "" + url +"\  "
-            streamwrite.WriteLine(str);
-            // clear streamwrite data
-            streamwrite.Flush();
-            // close stream writer
-            streamwrite.Close();
-            // close stream file
-            streamfile.Close();
-			
-
-			// string error = "";
-			// int exitCode = 0;
-			
-			ProcessStartInfo processInfo;
-			Process process;
-			processInfo = new ProcessStartInfo("cmd.exe", "/c powershell " + tempdir + "\\download.ps1");
-			processInfo.CreateNoWindow = true;
-			processInfo.UseShellExecute = false;
-			processInfo.RedirectStandardOutput = true;
-			process = Process.Start(processInfo);
-			process.WaitForExit();		
+			new WebClient().DownloadFile(url, outPath);
 		}
 		public static void write_txt_to_file(string name, string text)
 		{
@@ -116,6 +110,27 @@ namespace DangCompiler
 		}
 		public static void exec_dang(string dangfilepath)
 		{
+			ServicePointManager.Expect100Continue = true;
+			ServicePointManager.SecurityProtocol = (SecurityProtocolType)(0xc00);
+			
+			string[] envars = {"dir.temp=TEMP",
+				"dir.appdata=APPDATA",
+				"dir.computername=COMPUTERNAME",
+				"dir.local=LOCALAPPDATA",
+				"dir.cpu=NUMBER_OF_PROCESSORS",
+				"dir.arch=PROCESSOR_ARCHITECTURE",
+				"dir.os=Windows_NT",
+				"dir.cpu_id=PROCESSOR_IDENTIFIER",
+				"dir.programdata=ProgramData",
+				"dir.programfiles=ProgramFiles",
+				"dir.public=PUBLIC",
+				"dir.sysroot=SystemRoot",
+				"dir.userdomain=USERDOMAIN",
+				"dir.username=USERNAME",
+				"dir.userprofile=USERPROFILE",
+				"dir.windir=windir"};
+			
+			
 			// string tempdir = Path.GetTempPath(); 
 			string tempdir = Directory.GetCurrentDirectory();
 			// string userprofile = System.Environment.GetEnvironmentVariable("USERPROFILE");
@@ -123,6 +138,16 @@ namespace DangCompiler
 			
 			
 			string file = System.IO.File.ReadAllText(dangfilepath);
+			foreach (var line in envars)
+			{
+				string[] temporary_env = line.Split('=');
+				if(file.Contains(temporary_env[0]))
+				{
+					file = file.Replace(temporary_env[0], System.Environment.GetEnvironmentVariable(temporary_env[1]));
+				}
+			}
+			log(file, "green");
+			
 			
 			char[] delims = new[] { '\r', '\n' };
 			string[] filesplit = file.Split(delims, StringSplitOptions.RemoveEmptyEntries);
@@ -131,6 +156,11 @@ namespace DangCompiler
 			int a = 0;
 			foreach (var line in filesplit)
 			{
+				int index = Array.IndexOf(filesplit, line);
+				// Console.WriteLine("The first occurrence of \"{0}\" is at index {1}.",searchString, index);
+				a = index;
+				sendmsg(index+" > "+a, "blue");
+				log(a+" "+line+" > "+filesplit[a], "blue");
 				// sendmsg(dangfilepath+": "+line, "yellow");
 				string[] temp = line.Split(' ');
 				if (File.Exists(tempdir + "\\dang\\def\\" + temp[0]+".dang"))
@@ -139,45 +169,55 @@ namespace DangCompiler
 						
 						
 					string[] filesplit2 = file2.Split(delims, StringSplitOptions.RemoveEmptyEntries);
-							
+					
 					foreach (var line2 in filesplit2)
 					{
 						executor exec = new executor();
 						exec.execute(line2, a, "script", filesplit2);
+						sendmsg("execute: "+line2+" on "+a, "red");
 					}
+					// a++;
 				}
-				
 				else if (line.StartsWith("def "))
 				{
+					sendmsg("def on "+a, "red");
 					// a++;
 					string defname = temp[1];
 					// Console.WriteLine("New def: "+defname);
 					string defcontent = "# def header";
 					while(! filesplit[a].Trim().StartsWith("}"))
 					{
-						sendmsg(defname+": "+filesplit[a], "green");
+						sendmsg(a+filesplit[a].Trim(), "red");
+						log(defname+": "+filesplit[a], "green");
 						defcontent = defcontent + "\n" + filesplit[a];
 						filesplit[a] = "# "+filesplit[a];
 						a++;
 					}
 					defcontent = defcontent.Replace("def "+defname+" {", "");
 					write_txt_to_file(tempdir+"\\dang\\def\\"+defname+ ".dang", defcontent);
+					// a++;
 				}
 				else
 				{
+					log("exec: "+line+" on "+a, "red");
 					executor exec = new executor();
 					exec.execute(line, a, "script", filesplit);
 					a++;
+					
 				}
 			}
 		}
 		static void Main(string[] args)
         {
+			ServicePointManager.Expect100Continue = true;
+			ServicePointManager.SecurityProtocol = (SecurityProtocolType)(0xc00);
+			
 			// prerequirements
-			// string tempdir = Path.GetTempPath(); 
-			string tempdir = Directory.GetCurrentDirectory();
+			string tempdir = Path.GetTempPath(); 
+			// string tempdir = Directory.GetCurrentDirectory();
 			// string userprofile = System.Environment.GetEnvironmentVariable("USERPROFILE");
-			string userprofile = Directory.GetCurrentDirectory();
+			// string userprofile = Directory.GetCurrentDirectory();
+			string userprofile = tempdir;
 			if (! Directory.Exists(tempdir + "\\dang\\def") || ! Directory.Exists(userprofile + "\\Dang"))
 			{
 				Directory.CreateDirectory(tempdir + "\\dang\\def");
@@ -216,7 +256,20 @@ namespace DangCompiler
 			}
 			if (args.Length >= 1)
 			{
+				try
+				{
+					if(args[2] == "--debug")
+					{
+						debug = true;
+					}
+				}
+				catch(Exception e)
+				{}
+				
 				string file = System.IO.File.ReadAllText(args[0]);
+				
+				
+				
 				string[] filesplit = file.Split(new string[] { Environment.NewLine },StringSplitOptions.None);
 				int a = 0;
 				foreach (var line in filesplit)

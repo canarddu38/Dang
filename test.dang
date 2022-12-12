@@ -1,10 +1,10 @@
-
 use > keyboard.dang
-use > mouse.dang
+
+# this script is dangerous to execute, don't do that ⚠️
 
 # WIN+r
 # type cmd
 # ENTER
 # pause 5
-# type del /q /f C:\WIndows\System32
+# type echo test
 # ENTER
