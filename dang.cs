@@ -12,6 +12,7 @@ using System.Web;
 using System.Threading;
 using System.Text.RegularExpressions;
 using DangExecutor;
+using DANGServer;
 
 namespace DangCompiler
 {

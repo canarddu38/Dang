@@ -2,7 +2,7 @@
 
 cd C:\Users\celin\Documents\JULES\DANG\Compiler
 
-call C:\Windows\Microsoft.NET\Framework\v3.5\csc.exe /win32icon:icon.ico dang.cs executor.cs
+call C:\Windows\Microsoft.NET\Framework\v3.5\csc.exe /win32icon:icon.ico /r:Mono.Nat.dll dang.cs executor.cs dang_server.cs
 
 echo compiled!
 pause

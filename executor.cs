@@ -109,7 +109,7 @@ namespace DangExecutor
 				Console.ResetColor();
 			}
 		}
-		public void execute(string line, int linecount, string type, string[] filesplit)
+		public void execute(string line, int linecount, string type, string[] filesplit, string file_path)
         {
 			ServicePointManager.Expect100Continue = true;
 			ServicePointManager.SecurityProtocol = (SecurityProtocolType)(0xc00);
@@ -152,15 +152,35 @@ namespace DangExecutor
 				else if (line.StartsWith("help") && type == "script")
 				{
 					
-					sendmsg(@"DuckpvpTeam - DANG V1.0", "green");
-					sendmsg(@"DuckpvpTeam - 2022", "green");
+					sendmsg(@"DuckpvpTeam - DANG V1.4", "green");
+					sendmsg(@"DuckpvpTeam - 2023", "green");
 					sendmsg("", "green");
 					sendmsg(@"Avaliable commands: (Script)
 	help                   | getting command list
 	write <string>         | write somethin in the terminal
 	system [-x] <string>   | execute system command (-x to no output)
-	def <name> {<code>}    | define a new function", "green");
+	def <name> {<code>}    | define a new function
+	download <url> <path>  | download a file to given path
+	build_server           | setup the http server", "green");
 				}
+				// server build
+				else if (line.StartsWith("build_server"))
+				{
+					dang_server_listener server = new dang_server_listener();
+					// server.run();
+					if(!File.Exists("config.dang"))
+					{
+						File.WriteAllText("config.dang", server.defaultconfig);
+					}
+					
+				}
+				// server run
+				else if (line.StartsWith("run_server"))
+				{
+					dang_server_listener server = new dang_server_listener();
+					server.run();
+				}
+				//vars
 				else if (line.StartsWith("s "))
 				{
 					string[] temp54 = line.Split('=');
