@@ -12,7 +12,7 @@ using System.Web;
 using System.Threading;
 using System.Text.RegularExpressions;
 using DangExecutor;
-using DANGServer;
+using DANGserver;
 
 namespace DangCompiler
 {
@@ -174,7 +174,7 @@ namespace DangCompiler
 					foreach (var line2 in filesplit2)
 					{
 						executor exec = new executor();
-						exec.execute(line2, a, "script", filesplit2);
+						exec.execute(line2, a, "script", filesplit2, dangfilepath);
 						sendmsg("execute: "+line2+" on "+a, "red");
 					}
 					// a++;
@@ -202,7 +202,7 @@ namespace DangCompiler
 				{
 					log("exec: "+line+" on "+a, "red");
 					executor exec = new executor();
-					exec.execute(line, a, "script", filesplit);
+					exec.execute(line, a, "script", filesplit, dangfilepath);
 					a++;
 					
 				}
