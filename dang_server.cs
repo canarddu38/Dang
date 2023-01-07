@@ -10,15 +10,23 @@ using DangExecutor;
 
 namespace DANGserver
 {
-    class dang_server_listener
+    public class DangServerListener
     {
 		
-		static string version = "1.4";
+		public static string version = "1.4";
 		
-		static string newline = @"
+		public static string newline = @"
 ";
-		static string defaultconfig = "# Dang server config"+newline+newline+"# Debug"+newline+"s debug = false"+newline+newline+"# Listener"+newline+"s port = \"80\""+newline+newline+"# Server"+newline+"s website_folder = \"website\"";
- 
+		public static string defaultconfig = "# Dang server config ("+version+")"+newline+newline+"# Debug"+newline+"s debug = false"+newline+newline+"# Listener"+newline+"s port = \"80\""+newline+newline+"# Server"+newline+"s website_folder = \"website\"";
+		
+		public string DefaultConfig
+        {   
+			get
+			{
+				return defaultconfig;
+			}
+		}
+		
         public static void DeviceFound(object sender, DeviceEventArgs args)
         {
 			if(!File.Exists("config.dang"))
@@ -27,7 +35,7 @@ namespace DANGserver
 			}
 			
             INatDevice device = device = args.Device;
-            device.CreatePortMap(new Mapping(Protocol.Tcp, Int16.Parse(GetConfig("port")), Int16.Parse(GetConfig("port"))));
+            device.CreatePortMap(new Mapping(Protocol.Tcp, Int16.Parse(GetConfig("port", "config.dang")), Int16.Parse(GetConfig("port", "config.dang"))));
  
             foreach (Mapping portMap in device.GetAllMappings())
             {
@@ -35,7 +43,7 @@ namespace DANGserver
             }
  
             Console.WriteLine(device.GetExternalIP().ToString());
-            Console.WriteLine(device.GetSpecificMapping(Protocol.Tcp, Int16.Parse(GetConfig("port"))).PublicPort);
+            Console.WriteLine(device.GetSpecificMapping(Protocol.Tcp, Int16.Parse(GetConfig("port", "config.dang"))).PublicPort);
         }
  
         public static void DeviceLost(object sender, DeviceEventArgs args)
@@ -115,7 +123,7 @@ namespace DANGserver
 							else
 							{
 								executor exec = new executor();
-								exec.execute(cont2, b, "script", templist2);
+								exec.execute(cont2, b, "script", templist2, website_path+req.Url.AbsolutePath.Replace("/", @"\"));
 							}
 							b++;
 						}
@@ -200,16 +208,16 @@ namespace DANGserver
         }
 
 
-        public static void run(string[] args)
+        public void run(string configpath)
         {
             // NatUtility.Logger = new StreamWriter(File.OpenWrite("logfile.txt"));
 			
-			if(!File.Exists("config.dang"))
+			if(!File.Exists(configpath))
 			{
-				File.WriteAllText("config.dang", defaultconfig);
+				File.WriteAllText(configpath, defaultconfig);
 			}
 			
-			if(GetConfig("public") == "true")
+			if(GetConfig("public", configpath) == "true")
 			{
 				Console.WriteLine("public > enabled");
 				NatUtility.DeviceFound += DeviceFound;
@@ -221,8 +229,8 @@ namespace DANGserver
 				Console.WriteLine("public > disabled");
 			}
 			// url = "http://"+GetLocalIPAddress()+":"+GetConfig("port")+"/";
-			url = "http://localhost:"+GetConfig("port")+"/";
-			website_path = GetConfig("website_folder");
+			url = "http://localhost:"+GetConfig("port", configpath)+"/";
+			website_path = GetConfig("website_folder", configpath);
 			
 			Console.WriteLine("website path: "+website_path);
 			
@@ -240,12 +248,12 @@ namespace DANGserver
 			// Close the listener
 			listener.Close();
         }
-		public static string GetConfig(string item)
+		public static string GetConfig(string item, string configpath)
         {
 			string result = "";
-			if(File.Exists("config.dang"))
+			if(File.Exists(configpath))
 			{
-				string[] temp = File.ReadAllLines("config.dang");
+				string[] temp = File.ReadAllLines(configpath);
 				foreach(var line in temp)
 				{
 					if(!line.StartsWith("#") && line.Trim() != "")

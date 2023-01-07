@@ -157,29 +157,34 @@ namespace DangExecutor
 					sendmsg(@"DuckpvpTeam - 2023", "green");
 					sendmsg("", "green");
 					sendmsg(@"Avaliable commands: (Script)
-	help                   | getting command list
-	write <string>         | write somethin in the terminal
-	system [-x] <string>   | execute system command (-x to no output)
-	def <name> {<code>}    | define a new function
-	download <url> <path>  | download a file to given path
-	build_server           | setup the http server", "green");
+	# Basics
+	help                     | getting command list
+	write <string>           | write somethin in the terminal
+	def <name> {<code>}      | define a new function
+	
+	# Net
+	download <url> <path>    | download a file to given path
+	build_server             | setup the dang server
+	run_server <config path> | run the dang server with builded config
+	
+	# Sys<=>dang interaction
+	system [-x] <string>     | execute system command (-x to no output)", "green");
 				}
 				// server build
 				else if (line.StartsWith("build_server"))
 				{
-					dang_server_listener server = new dang_server_listener();
-					// server.run();
+					DangServerListener server = new DangServerListener();
 					if(!File.Exists("config.dang"))
 					{
-						File.WriteAllText("config.dang", server.defaultconfig);
+						File.WriteAllText("config.dang", server.DefaultConfig);
 					}
 					
 				}
 				// server run
-				else if (line.StartsWith("run_server"))
+				else if (line.StartsWith("run_server "))
 				{
-					dang_server_listener server = new dang_server_listener();
-					server.run();
+					DangServerListener server = new DangServerListener();
+					server.run(line.Replace("run_server ", ""));
 				}
 				//vars
 				else if (line.StartsWith("s "))

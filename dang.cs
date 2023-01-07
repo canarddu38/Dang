@@ -11,6 +11,8 @@ using System.IO.Compression;
 using System.Web;
 using System.Threading;
 using System.Text.RegularExpressions;
+using System.Security.Principal;
+using System.Reflection;
 using DangExecutor;
 using DANGserver;
 
@@ -208,10 +210,41 @@ namespace DangCompiler
 				}
 			}
 		}
+		public static void StartAsAdmin(string fileName)
+		{
+			var proc = new Process
+			{
+				StartInfo =
+				{
+					FileName = fileName, 
+					UseShellExecute = true, 
+					Verb = "runas"
+				}
+			};
+
+			proc.Start();
+		}
+		public static bool IsAdministrator()
+		{
+			var identity = WindowsIdentity.GetCurrent();
+			var principal = new WindowsPrincipal(identity);
+			return principal.IsInRole(WindowsBuiltInRole.Administrator);
+		}
 		static void Main(string[] args)
         {
 			ServicePointManager.Expect100Continue = true;
 			ServicePointManager.SecurityProtocol = (SecurityProtocolType)(0xc00);
+			if (!IsAdministrator())
+			{
+				Console.WriteLine("restarting as admin");
+				StartAsAdmin(Assembly.GetExecutingAssembly().Location);
+				return;
+			}
+			
+			
+			
+			
+			
 			
 			// prerequirements
 			string tempdir = Path.GetTempPath(); 
@@ -259,14 +292,13 @@ namespace DangCompiler
 			{
 				try
 				{
-					if(args[2] == "--debug")
+					if(args[1] == "--debug")
 					{
 						debug = true;
 					}
 				}
 				catch(Exception e)
 				{}
-				
 				string file = System.IO.File.ReadAllText(args[0]);
 				
 				
@@ -310,7 +342,20 @@ namespace DangCompiler
 			}
 			else
 			{	
-				sendmsg("[x] Error, no file specified, Usage: dang <file path>", "red");
+				sendmsg(@"[x] no file specified, Switching to console mode", "red");
+				Console.WriteLine("");
+				sendmsg("DuckSploit DANG V1.4 (https://github.com/canarddu38/Dang)", "yellow");
+				sendmsg("Type 'help' to get help, 'licence' and 'credits' for more infos", "yellow");
+				Console.WriteLine("");
+				while(true)
+				{
+					Console.Write(">> ");
+					string command = Console.ReadLine();
+					executor exec = new executor();
+					string[] temp = command.Split('µ');
+					exec.execute(command, 0, "script", temp, "none");
+				}
+				
 			}
 		}
 	}
