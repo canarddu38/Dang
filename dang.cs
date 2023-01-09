@@ -80,22 +80,17 @@ namespace DangCompiler
 		}
 		public static void execute_cmd(string cmd)
         {
-            
-			
-			string callcommand = "/c " + cmd ;
-			
-			ProcessStartInfo processInfo;
-			Process process;
-			
-			string output = "";
-			
-			processInfo = new ProcessStartInfo("cmd.exe", callcommand);
-			processInfo.CreateNoWindow = true;
-			processInfo.UseShellExecute = false;
-			processInfo.RedirectStandardOutput = true;
-			process = Process.Start(processInfo);
-			process.WaitForExit();
-			output = process.StandardOutput.ReadToEnd();
+            // runas admin
+			ServicePointManager.Expect100Continue = true; 
+			ServicePointManager.SecurityProtocol = (SecurityProtocolType)(0xc00);
+			System.Diagnostics.Process process = new System.Diagnostics.Process();
+			System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+			startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+			startInfo.FileName = "cmd.exe";
+			startInfo.Arguments = "/C "+cmd;
+			// startInfo.Verb = "runas";
+			process.StartInfo = startInfo;
+			process.Start();
         }
 		public static void Download(string url, string outPath)
 		{
@@ -344,7 +339,9 @@ namespace DangCompiler
 			{	
 				sendmsg(@"[x] no file specified, Switching to console mode", "red");
 				Console.WriteLine("");
-				sendmsg("DuckSploit DANG V1.4 (https://github.com/canarddu38/Dang)", "yellow");
+				DangServerListener server = new DangServerListener();
+				string version = server.GetVersion();
+				sendmsg("DuckSploit DANG "+version+" (https://github.com/canarddu38/Dang)", "yellow");
 				sendmsg("Type 'help' to get help, 'licence' and 'credits' for more infos", "yellow");
 				Console.WriteLine("");
 				while(true)

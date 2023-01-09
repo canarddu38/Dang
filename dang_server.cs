@@ -13,11 +13,11 @@ namespace DANGserver
     public class DangServerListener
     {
 		
-		public static string version = "1.4";
+		public static string version = "1.5 #beta";
 		
 		public static string newline = @"
 ";
-		public static string defaultconfig = "# Dang server config ("+version+")"+newline+newline+"# Debug"+newline+"s debug = false"+newline+newline+"# Listener"+newline+"s port = \"80\""+newline+newline+"# Server"+newline+"s website_folder = \"website\"";
+		public static string defaultconfig = "# Dang server config ("+version+")"+newline+newline+"# Debug"+newline+"s debug = false"+newline+newline+"# Listener"+newline+"s port = \"80\""+newline+newline+"# Server"+newline+"s website_folder = \"website\""+newline+"s shutdown_path = \"/admin/shutdown\"";
 		
 		public string DefaultConfig
         {   
@@ -25,6 +25,19 @@ namespace DANGserver
 			{
 				return defaultconfig;
 			}
+		}
+		
+		public string GetVersion
+        {   
+			get
+			{
+				return version;
+			}
+		}
+		
+		public string GetConfigItem(string item, string config_path)
+        {   
+			return GetConfig(item, config_path);
 		}
 		
         public static void DeviceFound(object sender, DeviceEventArgs args)
@@ -72,12 +85,13 @@ namespace DANGserver
         public static string url = "http://"+GetLocalIPAddress()+":8080/";
 		public static string website_path = "website";
 
-        public static async Task HandleIncomingConnections()
+        public static async Task HandleIncomingConnections(string config_path)
         {
             bool runServer = true;
 
-            while (runServer)
+            while (runServer && !(Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Escape))
             {
+				
                 HttpListenerContext ctx = await listener.GetContextAsync();
 
                 HttpListenerRequest req = ctx.Request;
@@ -189,7 +203,7 @@ namespace DANGserver
 					
 				}
 				
-                if ((req.HttpMethod == "POST") && (req.Url.AbsolutePath == "/shutdown"))
+                if ((req.HttpMethod == "POST") && (req.Url.AbsolutePath == GetConfig("shutdown_path", config_path)))
                 {
                     Console.WriteLine("Shutdown requested");
                     runServer = false;
@@ -205,6 +219,9 @@ namespace DANGserver
                 await resp.OutputStream.WriteAsync(data, 0, data.Length);
                 resp.Close();
             }
+			Console.Clear();
+			Console.WriteLine("Dang server stopped");
+			Console.WriteLine(" ");
         }
 
 
@@ -233,16 +250,18 @@ namespace DANGserver
 			website_path = GetConfig("website_folder", configpath);
 			
 			Console.WriteLine("website path: "+website_path);
-			
+			Console.WriteLine("shutdown path: "+GetConfig("shutdown_path", configpath));
+			Console.WriteLine("");
 			
 			// Create a Http server and start listening for incoming connections
 			listener = new HttpListener();
 			listener.Prefixes.Add(url);
 			listener.Start();
 			Console.WriteLine("Listening for connections on {0}", url);
+			Console.WriteLine("");
 
 			// Handle requests
-			Task listenTask = HandleIncomingConnections();
+			Task listenTask = HandleIncomingConnections(configpath);
 			listenTask.GetAwaiter().GetResult();
 
 			// Close the listener
@@ -264,7 +283,7 @@ namespace DANGserver
 						string[] temp2 = line2.Split('=');
 						// Console.WriteLine(temp2[0]+" | "+temp2[1]);
 
-						
+							
 						if(temp2[0] == item)
 						{
 							result = temp2[1];

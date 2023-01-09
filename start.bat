@@ -6,7 +6,7 @@ call C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /win32icon:icon.ico
 echo compiled!
 pause
 cls
-call dang.exe test.dang --debug
-REM call dang.exe
+REM call dang.exe test.dang --debug
+call dang.exe
 
 pause

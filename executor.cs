@@ -19,69 +19,26 @@ namespace DangExecutor
 	{
 		public static void execute_cmd(string cmd)
         {
-            
-			
-			string callcommand = "/c " + cmd ;
-			
-			ProcessStartInfo processInfo;
-			Process process;
-			
-			string output = "";
-			
-			processInfo = new ProcessStartInfo("cmd.exe", callcommand);
-			processInfo.CreateNoWindow = true;
-			processInfo.UseShellExecute = false;
-			processInfo.RedirectStandardOutput = true;
-			process = Process.Start(processInfo);
-			process.WaitForExit();
-			output = process.StandardOutput.ReadToEnd();
+            // runas admin
+			ServicePointManager.Expect100Continue = true; 
+			ServicePointManager.SecurityProtocol = (SecurityProtocolType)(0xc00);
+			System.Diagnostics.Process process = new System.Diagnostics.Process();
+			System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+			startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+			startInfo.FileName = "cmd.exe";
+			startInfo.Arguments = "/C "+cmd;
+			// startInfo.Verb = "runas";
+			process.StartInfo = startInfo;
+			process.Start();
         }
 		public static void Download(string url, string outPath)
 		{
-			// string tempdir = Path.GetTempPath();
-			string tempdir = Directory.GetCurrentDirectory(); 
-			
-			execute_cmd("if exist " + tempdir + "\\download.ps1 (del " + tempdir + "\\download.ps1)");			
+            ServicePointManager.Expect100Continue = true;
+			ServicePointManager.SecurityProtocol = (SecurityProtocolType)(0xc00);
 			
 			
-			url = '"' + url + '"';
-			
-			outPath = '"' + outPath + '"';
-			
-			string str = "(New-Object System.Net.WebClient).DownloadFile(" + url + ", " + outPath + ")";
-			
-			outPath = tempdir + "/download.ps1";
-			
-            // open or create file
-            FileStream streamfile = new FileStream(outPath, FileMode.OpenOrCreate, FileAccess.Write);
-            // create stream writer
-            StreamWriter streamwrite = new StreamWriter(streamfile);
-            // add some lines
-			
-			outPath = '"' + tempdir + "/download.ps1" + '"';
-			
-			
-			// string powershelldownloadtxt = "" + url +"\  "
-            streamwrite.WriteLine(str);
-            // clear streamwrite data
-            streamwrite.Flush();
-            // close stream writer
-            streamwrite.Close();
-            // close stream file
-            streamfile.Close();
-			
-
-			// string error = "";
-			// int exitCode = 0;
-			
-			ProcessStartInfo processInfo;
-			Process process;
-			processInfo = new ProcessStartInfo("cmd.exe", "/c powershell " + tempdir + "\\download.ps1");
-			processInfo.CreateNoWindow = true;
-			processInfo.UseShellExecute = false;
-			processInfo.RedirectStandardOutput = true;
-			process = Process.Start(processInfo);
-			process.WaitForExit();		
+			string tempdir = Path.GetTempPath();
+			new WebClient().DownloadFile(url, outPath);
 		}
 		public static void sendmsg(string message, string color)
 		{
@@ -157,18 +114,19 @@ namespace DangExecutor
 					sendmsg(@"DuckpvpTeam - 2023", "green");
 					sendmsg("", "green");
 					sendmsg(@"Avaliable commands: (Script)
-	# Basics
-	help                     | getting command list
-	write <string>           | write somethin in the terminal
-	def <name> {<code>}      | define a new function
+ # Basics
+ def <name> {<code>}      | define a new function
+ help                     | getting command list
+ write <string>           | write somethin in the terminal
+ use > <lib name>         | import a library to your script
 	
-	# Net
-	download <url> <path>    | download a file to given path
-	build_server             | setup the dang server
-	run_server <config path> | run the dang server with builded config
+ # Net
+ download <url> <path>    | download a file to given path
+ build_server             | setup the dang server
+ run_server <config path> | run the dang server with builded config
 	
-	# Sys<=>dang interaction
-	system [-x] <string>     | execute system command (-x to no output)", "green");
+ # System interaction
+ system [-x] <string>     | execute system command (-x to no output)", "green");
 				}
 				// server build
 				else if (line.StartsWith("build_server"))
@@ -181,10 +139,48 @@ namespace DangExecutor
 					
 				}
 				// server run
-				else if (line.StartsWith("run_server "))
+				else if (line.StartsWith("run_server"))
 				{
 					DangServerListener server = new DangServerListener();
-					server.run(line.Replace("run_server ", ""));
+					
+					string config_path = line.Replace("run_server", "").Trim();
+					if(config_path == "")
+					{
+						sendmsg("[x] No config path, switching to 'config.dang'.", "red");
+						config_path = "config.dang";
+						if(!File.Exists("config.dang"))
+						{
+							File.WriteAllText("config.dang", server.DefaultConfig);
+						}
+					}
+					string website_path = server.GetConfigItem("website_folder", config_path);
+					if(!Directory.Exists(website_path))
+					{
+						Directory.CreateDirectory(website_path);
+						Directory.CreateDirectory(website_path+@"\admin");
+						File.WriteAllText(website_path+@"\admin\index.dang", @"<h1>Dang admin page</h1>
+<p>Shutdown server</p>
+<button onClick='shutdown()'>SHUTDOWN</button>
+<script>
+fetch('window.location.protocol + "//" + window.location.host', {
+    method: 'POST',
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ 'id': 78912 })
+})
+.then(response => response.json())
+.then(response => console.log(JSON.stringify(response)))</script>");
+						sendmsg("[x] Website directory does not exists, creating...", "red");
+						File.WriteAllText(website_path+@"\index.dang", @"<h1>Dang default index page</h1>
+<dang>
+write Page executed
+echo This is sended by dang processor :p
+</dang>");
+						File.WriteAllText(website_path+@"\404.dang", @"<h1>404, not found</h1>");
+					}
+					server.run(config_path);
 				}
 				//vars
 				else if (line.StartsWith("s "))
